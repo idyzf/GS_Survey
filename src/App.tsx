@@ -10,6 +10,7 @@ import { IntroModal } from './components/IntroModal';
 import { SurveyWizard } from './components/SurveyWizard';
 import { ResultsPage } from './components/ResultsPage';
 import { AdminModal } from './components/AdminModal';
+import { recordLocalSubmission } from './data/staticStorage';
 
 export default function App() {
   const [language, setLanguage] = useState<Language>('pt');
@@ -48,16 +49,25 @@ export default function App() {
           answers: payload.answers,
         });
         setCurrentView('results');
-      } else {
-        const err = await response.json();
-        alert(`Erro ao registrar pesquisa: ${err.error || 'Falha no servidor'}`);
+        return;
       }
     } catch (error) {
-      console.error('Submission failed:', error);
-      alert('Erro de conexão ao enviar a pesquisa. Por favor, tente novamente.');
-    } finally {
-      setIsSubmitting(false);
+      console.warn('Backend API unavailable, using client-side fallback:', error);
     }
+
+    // Client-side fallback for static deployments (e.g. GitHub Pages)
+    const localResult = recordLocalSubmission(payload);
+    setLatestSubmission({
+      id: localResult.submissionId,
+      selectedTeam: payload.selectedTeam,
+      teamName: localResult.team?.name || payload.selectedTeam,
+      totalPoints: localResult.totalPoints,
+      answeredCount: localResult.answeredCount,
+      timestamp: localResult.timestamp,
+      answers: payload.answers,
+    });
+    setCurrentView('results');
+    setIsSubmitting(false);
   };
 
   return (

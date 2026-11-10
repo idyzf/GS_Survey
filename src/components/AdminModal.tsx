@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Language, SubmissionRecord, EmailLogEntry } from '../types/survey';
+import { getLocalAdminData, resetLocalData } from '../data/staticStorage';
 import {
   X,
   Database,
@@ -45,14 +46,23 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       if (subRes.ok) {
         const subData = await subRes.json();
         setSubmissions(subData.submissions || []);
+      } else {
+        const { submissions: localSubs } = getLocalAdminData();
+        setSubmissions(localSubs);
       }
       if (emailRes.ok) {
         const emailData = await emailRes.json();
         setEmailLogs(emailData.logs || []);
         if (emailData.adminEmail) setAdminEmail(emailData.adminEmail);
+      } else {
+        const { emailLogs: localLogs } = getLocalAdminData();
+        setEmailLogs(localLogs);
       }
     } catch (err) {
-      console.error('Error fetching admin data:', err);
+      console.warn('Error fetching admin data from API, using local storage:', err);
+      const { submissions: localSubs, emailLogs: localLogs } = getLocalAdminData();
+      setSubmissions(localSubs);
+      setEmailLogs(localLogs);
     } finally {
       setLoading(false);
     }
@@ -87,10 +97,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         setActionMessage(language === 'pt' ? 'Banco de dados restaurado!' : 'Database reset successfully!');
         fetchData();
         setTimeout(() => setActionMessage(null), 3000);
+        return;
       }
     } catch (e) {
-      console.error(e);
+      // ignore, fallback to local reset
     }
+    resetLocalData();
+    setActionMessage(language === 'pt' ? 'Banco de dados restaurado localmente!' : 'Database reset locally successfully!');
+    fetchData();
+    setTimeout(() => setActionMessage(null), 3000);
   };
 
   const filteredSubmissions = submissions.filter((s) => {

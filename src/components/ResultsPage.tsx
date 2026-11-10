@@ -6,6 +6,7 @@ import {
   SubmissionRecord,
 } from '../types/survey';
 import { TEAMS, SURVEY_QUESTIONS } from '../data/surveyQuestions';
+import { getLocalLeaderboard } from '../data/staticStorage';
 import {
   Trophy,
   CheckCircle2,
@@ -48,20 +49,26 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
 
-  // Fetch live leaderboard from API
+  // Fetch live leaderboard from API or local fallback
   const fetchLeaderboard = async () => {
     try {
       const res = await fetch('/api/survey/leaderboard');
       if (res.ok) {
         const data = await res.json();
-        setLeaderboard(data.teams || []);
-        setLastRefreshed(new Date().toLocaleTimeString());
+        if (data.teams && data.teams.length > 0) {
+          setLeaderboard(data.teams);
+          setLastRefreshed(new Date().toLocaleTimeString());
+          setLoading(false);
+          return;
+        }
       }
     } catch (err) {
-      console.error('Failed to load live leaderboard:', err);
-    } finally {
-      setLoading(false);
+      console.warn('Live API unavailable, using local leaderboard:', err);
     }
+    // Fallback for static GitHub Pages hosting
+    setLeaderboard(getLocalLeaderboard());
+    setLastRefreshed(new Date().toLocaleTimeString());
+    setLoading(false);
   };
 
   useEffect(() => {
