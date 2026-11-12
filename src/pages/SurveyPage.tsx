@@ -83,13 +83,11 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-400 truncate">
             <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            <span className="text-slate-300 font-semibold tracking-wide">
-              {String(question.id).padStart(2, '0')} BIO-PIPELINE TELEMETRY SURVEY
+            <span className="text-slate-300 font-semibold tracking-wide uppercase">
+              {t('Questão', 'Question')} {String(question.id).padStart(2, '0')}
             </span>
             <span className="text-slate-600">/</span>
-            <span className="text-cyan-400 truncate">
-              Q{question.id}: {question.category[language]}
-            </span>
+            <span className="text-cyan-400 truncate">{question.category[language]}</span>
           </div>
           <div className="hidden sm:flex items-center gap-3 text-slate-400">
             {selectedTeam && (
@@ -115,9 +113,13 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
           {/* Question */}
           <div className="lg:col-span-8 bg-[#0f121a] border border-slate-800/90 rounded-2xl p-6 sm:p-8 flex flex-col shadow-2xl">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <span className="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-wider px-3 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-300 uppercase">
-                {question.category[language]}
-              </span>
+              {isTeamQuestion ? (
+                <span />
+              ) : (
+                <span className="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-wider px-3 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-300 uppercase">
+                  +{POINTS_PER_QUESTION.toLocaleString(language === 'pt' ? 'pt-BR' : 'en-US', { minimumFractionDigits: 2 })} PTS
+                </span>
+              )}
               <span className="text-xs font-mono text-slate-400">{answerKind}</span>
             </div>
 
