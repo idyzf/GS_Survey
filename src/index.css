@@ -1,23 +1,19 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-mono: 'IBM Plex Mono', Menlo, Monaco, Consolas, monospace;
-  }
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', Menlo, Monaco, Consolas, monospace;
+}
 
+@layer base {
   body {
-    font-family: var(--font-sans);
     background-color: #07090e;
     color: #f1f5f9;
     overflow-x: hidden;
-    min-height: 100vh;
-    selection-background-color: #00e5ff;
-    selection-color: #07090e;
   }
 }
 
-/* Custom scrollbars */
+/* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -33,7 +29,7 @@
   background: #0284c7;
 }
 
-/* Glowing border cards matching screenshot */
+/* Gradient border used by the intro card */
 .glow-card-border {
   position: relative;
   background: #11141c;
@@ -52,9 +48,7 @@
   pointer-events: none;
 }
 
-.glow-card-active {
-  position: relative;
-}
+/* Gradient border for the selected answer card */
 .glow-card-active::before {
   content: '';
   position: absolute;
@@ -67,9 +61,4 @@
   mask-composite: exclude;
   pointer-events: none;
   box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
-}
-
-/* Tabular figures for leaderboards and metrics */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
 }

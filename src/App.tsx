@@ -1,126 +1,74 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useState } from 'react';
+import { AdminModal } from './components/admin/AdminModal';
+import { submitSurvey } from './lib/api';
+import { HomePage } from './pages/HomePage';
+import { IntroPage } from './pages/IntroPage';
+import { ResultsPage } from './pages/ResultsPage';
+import { SurveyPage } from './pages/SurveyPage';
+import type { Language, SubmissionRecord, SurveySubmissionPayload } from './types/survey';
 
-import React, { useState } from 'react';
-import { Language, SurveySubmissionPayload, TeamId } from './types/survey';
-import { HomeHero } from './components/HomeHero';
-import { IntroModal } from './components/IntroModal';
-import { SurveyWizard } from './components/SurveyWizard';
-import { ResultsPage } from './components/ResultsPage';
-import { AdminModal } from './components/AdminModal';
-import { recordLocalSubmission } from './data/staticStorage';
+type View = 'home' | 'intro' | 'survey' | 'results';
 
 export default function App() {
   const [language, setLanguage] = useState<Language>('pt');
-  const [currentView, setCurrentView] = useState<'home' | 'intro' | 'survey' | 'results'>('home');
+  const [view, setView] = useState<View>('home');
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [latestSubmission, setLatestSubmission] = useState<{
-    id: string;
-    selectedTeam: TeamId;
-    teamName: string;
-    totalPoints: number;
-    answeredCount: number;
-    timestamp: string;
-    answers: Record<number, any>;
-  } | null>(null);
+  const [latestSubmission, setLatestSubmission] = useState<SubmissionRecord | null>(null);
 
-  // Handle survey submission to backend
-  const handleCompleteSurvey = async (payload: SurveySubmissionPayload) => {
+  const handleComplete = async (payload: SurveySubmissionPayload) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/survey/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setLatestSubmission({
-          id: data.submissionId,
-          selectedTeam: payload.selectedTeam,
-          teamName: data.team?.name || payload.selectedTeam,
-          totalPoints: data.totalPoints,
-          answeredCount: data.answeredCount,
-          timestamp: data.timestamp,
-          answers: payload.answers,
-        });
-        setCurrentView('results');
-        return;
-      }
-    } catch (error) {
-      console.warn('Backend API unavailable, using client-side fallback:', error);
+      setLatestSubmission(await submitSurvey(payload));
+      setView('results');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Client-side fallback for static deployments (e.g. GitHub Pages)
-    const localResult = recordLocalSubmission(payload);
-    setLatestSubmission({
-      id: localResult.submissionId,
-      selectedTeam: payload.selectedTeam,
-      teamName: localResult.team?.name || payload.selectedTeam,
-      totalPoints: localResult.totalPoints,
-      answeredCount: localResult.answeredCount,
-      timestamp: localResult.timestamp,
-      answers: payload.answers,
-    });
-    setCurrentView('results');
-    setIsSubmitting(false);
   };
+
+  const openAdmin = () => setIsAdminOpen(true);
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-cyan-400 selection:text-slate-950">
-      {/* Main Content View Switcher */}
       <main className="flex-1">
-        {currentView === 'home' && (
-          <HomeHero
+        {view === 'home' && (
+          <HomePage
             language={language}
             onLanguageChange={setLanguage}
-            onStartSurvey={() => setCurrentView('intro')}
-            onViewLeaderboard={() => setCurrentView('results')}
-            onOpenAdmin={() => setIsAdminOpen(true)}
+            onStartSurvey={() => setView('intro')}
+            onViewLeaderboard={() => setView('results')}
+            onOpenAdmin={openAdmin}
           />
         )}
-
-        {currentView === 'intro' && (
-          <IntroModal
+        {view === 'intro' && (
+          <IntroPage
             language={language}
             onLanguageChange={setLanguage}
-            onAcceptAndContinue={() => setCurrentView('survey')}
-            onBackToHome={() => setCurrentView('home')}
+            onContinue={() => setView('survey')}
+            onBack={() => setView('home')}
           />
         )}
-
-        {currentView === 'survey' && (
-          <SurveyWizard
+        {view === 'survey' && (
+          <SurveyPage
             language={language}
-            onComplete={handleCompleteSurvey}
-            onCancel={() => setCurrentView('home')}
             isSubmitting={isSubmitting}
+            onComplete={handleComplete}
+            onCancel={() => setView('home')}
           />
         )}
-
-        {currentView === 'results' && (
+        {view === 'results' && (
           <ResultsPage
             language={language}
             latestSubmission={latestSubmission}
             onRetake={() => {
               setLatestSubmission(null);
-              setCurrentView('intro');
+              setView('intro');
             }}
-            onOpenAdmin={() => setIsAdminOpen(true)}
           />
         )}
       </main>
 
-      {/* Admin Portal Modal */}
-      <AdminModal
-        language={language}
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-      />
+      <AdminModal language={language} isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
     </div>
   );
 }
