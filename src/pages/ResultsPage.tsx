@@ -69,8 +69,8 @@ export function ResultsPage({ language, latestSubmission, onRetake }: ResultsPag
                 </h4>
                 <p className="text-xs text-slate-400">
                   {t(
-                    `Seus pontos foram somados à equipe ${latestSubmission.teamName}. Notificação automática enviada para o e-mail administrativo.`,
-                    `Points added to ${latestSubmission.teamName}. Automatic notification logged to administrator.`
+                    `Seus pontos foram somados à equipe ${latestSubmission.teamName}.`,
+                    `Points added to ${latestSubmission.teamName}.`
                   )}
                 </p>
               </div>
@@ -92,7 +92,7 @@ export function ResultsPage({ language, latestSubmission, onRetake }: ResultsPag
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-xs font-mono text-purple-400 tracking-wider uppercase">
                 <span>📊</span>
-                <span>CONSORTIUM BENCHMARKS</span>
+                <span>GREAT PEOPLE, AMAZING TEAMS</span>
               </div>
               <div className="flex items-center gap-2 text-xs font-mono px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
@@ -103,8 +103,8 @@ export function ResultsPage({ language, latestSubmission, onRetake }: ResultsPag
             <h2 className="text-3xl font-bold tracking-tight text-white mb-1">Teams Leaderboard</h2>
             <p className="text-xs sm:text-sm text-slate-400 mb-6 leading-relaxed">
               {t(
-                'Telemetria de desempenho comparativo entre pipelines genômicos ativos e equipes de engenharia.',
-                'Comparative performance telemetry across active genomic pipelines and lab engineering squads.'
+                'Desempenho comparativo entre equipes de engenharia.',
+                'Comparative performance across lab and engineering squads.'
               )}
             </p>
 
