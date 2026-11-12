@@ -1,4 +1,4 @@
-import { ArrowRight, Clock, HelpCircle, Play, Shield, Sparkles, Trophy } from 'lucide-react';
+import { ArrowRight, Clock, HelpCircle, Play, Shield, Trophy } from 'lucide-react';
 import { DnaCanvas } from '../components/DnaCanvas';
 import { translator } from '../lib/i18n';
 import type { Language } from '../types/survey';
@@ -8,7 +8,6 @@ interface HomePageProps {
   onLanguageChange: (lang: Language) => void;
   onStartSurvey: () => void;
   onViewLeaderboard: () => void;
-  onOpenAdmin: () => void;
 }
 
 const LANGUAGES: { id: Language; label: string }[] = [
@@ -16,24 +15,27 @@ const LANGUAGES: { id: Language; label: string }[] = [
   { id: 'pt', label: 'Português' },
 ];
 
-const badgeClass =
-  'flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-900/70 border border-slate-800 text-xs font-medium text-slate-300';
-const footerTagClass =
-  'flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400';
+/** Same distance from the screen edges for the language picker, hero text and footer. */
+const EDGE = 'px-6 sm:px-10 lg:px-16 xl:px-20';
 
-export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLeaderboard, onOpenAdmin }: HomePageProps) {
+const badgeClass =
+  'flex items-center gap-2 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-lg bg-slate-900/70 border border-slate-800 text-[11px] sm:text-xs font-medium text-slate-300';
+
+export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLeaderboard }: HomePageProps) {
   const t = translator(language);
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-[#07090e]">
+    <div className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-[#07090e]">
       {/* 3D background */}
       <div className="absolute right-0 top-0 bottom-0 w-full lg:w-3/5 h-full opacity-85 pointer-events-auto">
         <DnaCanvas variant="hero" />
         <div className="absolute inset-0 bg-radial from-transparent via-[#07090e]/60 to-[#07090e] pointer-events-none" />
       </div>
+      {/* Below lg the helix spans the full width: darken the bottom so the text stays readable. */}
+      <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#07090e] via-[#07090e]/80 to-transparent pointer-events-none lg:hidden" />
 
       {/* Language picker */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 flex justify-end">
+      <div className={`relative z-10 w-full ${EDGE} pt-8 flex justify-end`}>
         <div className="flex flex-col items-end gap-2">
           <span className="text-sm font-light text-slate-300">
             {t('Escolha seu idioma de preferência', 'Choose preferred language')}
@@ -60,8 +62,8 @@ export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLead
         </div>
       </div>
 
-      {/* Hero */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 lg:py-24 flex-1 flex flex-col justify-center">
+      {/* Hero: anchored to the bottom-left corner, scaling with the viewport */}
+      <div className={`relative z-10 w-full ${EDGE} pt-16 pb-[clamp(2rem,7vh,5rem)] flex-1 flex flex-col justify-end`}>
         <div className="max-w-2xl">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.12]">
             <span>Genomics Software</span>
@@ -72,24 +74,14 @@ export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLead
             </span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-xl">
+          <p className="mt-[clamp(1rem,2.5vh,1.75rem)] text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-xl">
             {t(
               'Acelerando descobertas disruptivas em pipelines de bioinformática, genômica em nuvem e arquiteturas de medicina de precisão.',
               'Accelerating disruptive discoveries in bioinformatics pipelines, cloud genomics, and precision medicine architectures.'
             )}
           </p>
 
-          <div className="mt-5 flex items-center gap-2 text-xs font-mono text-cyan-300/90 bg-cyan-950/40 border border-cyan-800/50 rounded-lg px-3 py-2 max-w-md">
-            <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
-            <span>
-              {t(
-                'Gamificado: Escolha seu time e acumule até 100 pontos para o placar!',
-                'Gamified: Select your squad and contribute up to 100 pts to the leaderboard!'
-              )}
-            </span>
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className="mt-[clamp(1.5rem,4vh,2.5rem)] flex flex-wrap items-center gap-4">
             <button
               onClick={onStartSurvey}
               className="group relative inline-flex items-center gap-3 px-7 py-4 text-base font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
@@ -106,41 +98,22 @@ export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLead
               <span>{t('Ver Placar das Equipes', 'View Teams Leaderboard')}</span>
             </button>
           </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <div className={badgeClass}>
-              <Shield className="w-3.5 h-3.5 text-cyan-400" />
-              <span>{t('100% Anônimo', '100% Anonymous')}</span>
-            </div>
-            <div className={badgeClass}>
-              <Clock className="w-3.5 h-3.5 text-purple-400" />
-              <span>{t('~8-10 min Tempo médio', '~8-10 min Average time')}</span>
-            </div>
-            <div className={badgeClass}>
-              <HelpCircle className="w-3.5 h-3.5 text-pink-400" />
-              <span>{t('17 Questões Multi-Choice', '17 Multi-Choice Questions')}</span>
-            </div>
-          </div>
         </div>
       </div>
 
       <footer className="relative z-10 border-t border-slate-900/90 bg-[#05070a]/90 backdrop-blur-sm py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className={footerTagClass}>
-              <span>🎓</span>
-              <span>EXPLORATORY ACADEMIC BIO-SOFTWARE RESEARCH</span>
-            </div>
-            <div className={footerTagClass}>
-              <span>🔒</span>
-              <span>ANONYMOUS E2EE INGESTION (SHA-256)</span>
-            </div>
+        <div className={`${EDGE} flex flex-wrap items-center justify-end gap-2 sm:gap-3`}>
+          <div className={badgeClass}>
+            <Shield className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{t('100% Anônimo', '100% Anonymous')}</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px] text-slate-500 text-center md:text-right">
-            <button onClick={onOpenAdmin} className="hover:text-cyan-400 transition-colors text-slate-500 cursor-pointer">
-              {t('Painel Admin', 'Admin Portal')}
-            </button>
-            <span>© 2026 GENOME.DEV Bio-Computational Research Consortium.</span>
+          <div className={badgeClass}>
+            <Clock className="w-3.5 h-3.5 text-purple-400" />
+            <span>{t('~8-10 min Tempo médio', '~8-10 min Average time')}</span>
+          </div>
+          <div className={badgeClass}>
+            <HelpCircle className="w-3.5 h-3.5 text-pink-400" />
+            <span>{t('17 Questões Multi-Choice', '17 Multi-Choice Questions')}</span>
           </div>
         </div>
       </footer>
