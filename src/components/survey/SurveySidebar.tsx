@@ -1,8 +1,10 @@
 import { Zap } from 'lucide-react';
 import { SECTION_TITLES, SURVEY_QUESTIONS } from '../../data/questions';
 import { translator } from '../../lib/i18n';
-import type { Language, Question } from '../../types/survey';
+import { TEAMS } from '../../data/teams';
+import type { Language, Question, TeamId } from '../../types/survey';
 import { DnaCanvas } from '../DnaCanvas';
+import { CREST_STYLES, TeamCrest } from '../TeamCrest';
 
 const RAIL_STEPS = [1, 5, 10, 15, 17];
 const TOTAL = SURVEY_QUESTIONS.length;
@@ -11,10 +13,12 @@ interface SectionPanelProps {
   question: Question;
   language: Language;
   points: number;
+  /** Confirmed team: its crest replaces the DNA helix. */
+  team: TeamId | null;
 }
 
 /** Left column: 3D helix, section context and running score. */
-export function SectionPanel({ question, language, points }: SectionPanelProps) {
+export function SectionPanel({ question, language, points, team }: SectionPanelProps) {
   const t = translator(language);
   const isScored = question.type !== 'team_select';
 
@@ -29,9 +33,18 @@ export function SectionPanel({ question, language, points }: SectionPanelProps) 
       </div>
 
       <div className="relative w-full h-48 rounded-xl overflow-hidden bg-black/50 border border-slate-800 mb-4">
-        <DnaCanvas variant="card" />
+        {team ? (
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ background: `radial-gradient(circle at 50% 45%, ${CREST_STYLES[team].accent}26, transparent 65%)` }}
+          >
+            <TeamCrest team={team} className="h-36 animate-crest-float" />
+          </div>
+        ) : (
+          <DnaCanvas variant="card" />
+        )}
         <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 border border-slate-800 text-[10px] font-mono text-slate-400">
-          3D HELIX MODEL
+          {team ? TEAMS[team].tag : '3D HELIX MODEL'}
         </div>
       </div>
 
