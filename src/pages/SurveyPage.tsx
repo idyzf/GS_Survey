@@ -113,18 +113,18 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
 
           {/* Question */}
           <div className="lg:col-span-8 bg-[#0f121a] border border-slate-800/90 rounded-2xl p-6 sm:p-8 flex flex-col shadow-2xl">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              {isTeamQuestion ? (
-                <span />
-              ) : (
-                <span className="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-wider px-3 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-300 uppercase">
-                  +{POINTS_PER_QUESTION.toLocaleString(language === 'pt' ? 'pt-BR' : 'en-US', { minimumFractionDigits: 2 })} PTS
-                </span>
-              )}
-              <span className="text-xs font-mono text-slate-400">{answerKind}</span>
+            {/* Title on the left; answer type and points tag stacked in the top-right corner */}
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight">{question.title[language]}</h2>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <span className="text-xs font-mono text-slate-400 whitespace-nowrap">{answerKind}</span>
+                {!isTeamQuestion && (
+                  <span className="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-wider px-3 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-300 uppercase whitespace-nowrap">
+                    +{POINTS_PER_QUESTION.toLocaleString(language === 'pt' ? 'pt-BR' : 'en-US', { minimumFractionDigits: 2 })} PTS
+                  </span>
+                )}
+              </div>
             </div>
-
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 leading-tight">{question.title[language]}</h2>
             {question.subtitle && (
               <p className="text-sm text-slate-400 mb-6 leading-relaxed">{question.subtitle[language]}</p>
             )}
