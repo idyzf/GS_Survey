@@ -2,7 +2,7 @@ import { Check } from 'lucide-react';
 import { translator } from '../../lib/i18n';
 import { isAnswered } from '../../lib/scoring';
 import type { Answer, AnswerData, Language, Question, TeamId } from '../../types/survey';
-import { DetailInput, OptionCard, SelectedBadge } from './OptionCard';
+import { DetailInput, OptionCard } from './OptionCard';
 
 const LIKERT_SCORES = [1, 2, 3, 4, 5];
 
@@ -29,12 +29,6 @@ export function TeamSelect({ question, language, selectedTeam, otherTeamText, on
         const selected = selectedTeam === opt.id;
         return (
           <OptionCard key={opt.id} selected={selected} onSelect={() => onSelect(opt.id as TeamId)}>
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
-                {opt.code}
-              </span>
-              {selected && <SelectedBadge label={t('SELECIONADO', 'SELECTED')} />}
-            </div>
             <h4 className="text-base font-semibold text-white group-hover:text-cyan-300 transition-colors mb-1">
               {opt.label[language]}
             </h4>
@@ -77,10 +71,6 @@ export function QuestionInput({ question, language, answer, onChange }: Question
                 selected={selected}
                 onSelect={() => onChange((prev) => toAnswer(opt.id, prev?.value === opt.id ? prev.textDetail : undefined))}
               >
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-[11px] font-mono text-slate-500">{opt.code}</span>
-                  {selected && <SelectedBadge label={t('SELECIONADO', 'SELECTED')} />}
-                </div>
                 <div className="text-sm font-medium text-white group-hover:text-cyan-200 transition-colors">
                   {opt.label[language]}
                 </div>
@@ -215,10 +205,6 @@ export function QuestionInput({ question, language, answer, onChange }: Question
                 selected={answer?.value === opt.id}
                 onSelect={() => onChange((prev) => toAnswer(opt.id, opt.id === 'yes' ? prev?.textDetail : ''))}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-mono text-slate-500">{opt.code}</span>
-                  {answer?.value === opt.id && <SelectedBadge plain label={t('ESCOLHIDO', 'CHOSEN')} />}
-                </div>
                 <div className="text-sm font-semibold text-white">{opt.label[language]}</div>
               </OptionCard>
             ))}

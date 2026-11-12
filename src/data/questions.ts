@@ -102,7 +102,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Mapeamos o tipo de instituição para entender a escala de infraestrutura e governança adotada.',
       en: 'Mapping institution types to understand infrastructure and governance scale.',
     },
-    category: { pt: 'ORGANIZAÇÃO • +6,25 PTS', en: 'ORGANIZATION • +6.25 PTS' },
+    category: { pt: 'ORGANIZAÇÃO', en: 'ORGANIZATION' },
     title: {
       pt: 'Em que tipo de organização você trabalha?',
       en: 'What type of organization do you work in?',
@@ -140,7 +140,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Tempo de contato prático com softwares, pipelines ou dados de sequenciamento.',
       en: 'Years of hands-on experience with software, pipelines, or sequencing data.',
     },
-    category: { pt: 'SENIORIDADE & TEMPO • +6,25 PTS', en: 'SENIORITY & EXPERIENCE • +6.25 PTS' },
+    category: { pt: 'SENIORIDADE & TEMPO', en: 'SENIORITY & EXPERIENCE' },
     title: {
       pt: 'Há quanto tempo você trabalha com software ou análise genômica?',
       en: 'How long have you worked with software or genomic analysis?',
@@ -176,7 +176,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Finalidade primária dos algoritmos e sistemas operados.',
       en: 'Primary domain purpose for operated algorithms and systems.',
     },
-    category: { pt: 'FINALIDADE DO SOFTWARE • +6,25 PTS', en: 'SOFTWARE PURPOSE • +6.25 PTS' },
+    category: { pt: 'FINALIDADE DO SOFTWARE', en: 'SOFTWARE PURPOSE' },
     title: {
       pt: 'Qual é o principal uso do software com o qual você trabalha?',
       en: 'What is the primary use of the software you work with?',
@@ -221,8 +221,8 @@ export const SURVEY_QUESTIONS: Question[] = [
       en: 'Evaluate technical, human, and regulatory dimensions of the bio-pipeline lifecycle.',
     },
     category: {
-      pt: 'GRAU DE DESAFIO (ESCALA 1 A 5) • +6,25 PTS',
-      en: 'CHALLENGE LEVEL (1 TO 5 SCALE) • +6.25 PTS',
+      pt: 'GRAU DE DESAFIO (ESCALA 1 A 5)',
+      en: 'CHALLENGE LEVEL (1 TO 5 SCALE)',
     },
     title: {
       pt: 'Em uma escala de 1 (nenhuma dificuldade) a 5 (muita dificuldade), quanto cada item é um desafio no seu dia a dia?',
@@ -297,7 +297,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Entendimento cruzado de terminologias biológicas vs. engenharia computacional.',
       en: 'Cross-functional comprehension of biological vs. software engineering terms.',
     },
-    category: { pt: 'DISSONÂNCIA DE CONCEITOS • +6,25 PTS', en: 'TERMINOLOGY GAP • +6.25 PTS' },
+    category: { pt: 'DISSONÂNCIA DE CONCEITOS', en: 'TERMINOLOGY GAP' },
     title: {
       pt: 'Com que frequência termos ou requisitos são entendidos de formas diferentes entre pessoas de áreas distintas no seu time?',
       en: 'How often are terms or requirements understood differently between members of distinct disciplines in your team?',
@@ -324,8 +324,8 @@ export const SURVEY_QUESTIONS: Question[] = [
       en: 'Real incident sharing regarding domain misalignment.',
     },
     category: {
-      pt: 'RELATO OPERACIONAL • +6,25 PTS (OPCIONAL)',
-      en: 'OPERATIONAL REPORT • +6.25 PTS (OPTIONAL)',
+      pt: 'RELATO OPERACIONAL (OPCIONAL)',
+      en: 'OPERATIONAL REPORT (OPTIONAL)',
     },
     title: {
       pt: 'Descreva brevemente uma situação em que isso aconteceu e como foi resolvida.',
@@ -353,7 +353,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Definição quantitativa de SLOs e critérios de aceitação para análise genômica.',
       en: 'Quantitative SLO definition and acceptance criteria for genomic analysis.',
     },
-    category: { pt: 'METROLOGIA DE QUALIDADE • +6,25 PTS', en: 'QUALITY METRICS • +6.25 PTS' },
+    category: { pt: 'METROLOGIA DE QUALIDADE', en: 'QUALITY METRICS' },
     title: {
       pt: 'Os requisitos de qualidade (reprodutibilidade, acurácia, desempenho, rastreabilidade) são definidos de forma mensurável?',
       en: 'Are quality requirements (reproducibility, accuracy, performance, traceability) defined in a measurable way?',
@@ -383,8 +383,8 @@ export const SURVEY_QUESTIONS: Question[] = [
       en: 'Tools and workflows used to record and track engineering specifications.',
     },
     category: {
-      pt: 'REGISTRO DE REQUISITOS (MÚLTIPLA SELEÇÃO) • +6,25 PTS',
-      en: 'REQUIREMENTS LOG (MULTI-SELECT) • +6.25 PTS',
+      pt: 'REGISTRO DE REQUISITOS (MÚLTIPLA SELEÇÃO)',
+      en: 'REQUIREMENTS LOG (MULTI-SELECT)',
     },
     title: {
       pt: 'Como os requisitos costumam ser registrados no seu contexto?',
@@ -455,7 +455,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Propostas práticas para elevar a precisão de requisitos no pipeline bioinformático.',
       en: 'Actionable suggestions to improve requirement fidelity in bio-pipelines.',
     },
-    category: { pt: 'SUGESTÃO PRÁTICA • +6,25 PTS', en: 'ACTIONABLE PRACTICE • +6.25 PTS' },
+    category: { pt: 'SUGESTÃO PRÁTICA', en: 'ACTIONABLE PRACTICE' },
     title: {
       pt: 'Qual prática você acha que mais melhoraria a definição de requisitos no seu time?',
       en: 'What practice do you think would most improve requirements definition in your team?',
@@ -481,7 +481,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Nível de intimidade conceitual com princípios de Domain-Driven Design (Evans, Vernon).',
       en: 'Level of conceptual familiarity with Domain-Driven Design principles.',
     },
-    category: { pt: 'DOMAIN-DRIVEN DESIGN • +6,25 PTS', en: 'DOMAIN-DRIVEN DESIGN • +6.25 PTS' },
+    category: { pt: 'DOMAIN-DRIVEN DESIGN', en: 'DOMAIN-DRIVEN DESIGN' },
     title: {
       pt: 'Qual é o seu nível de familiaridade com Domain-Driven Design (DDD)?',
       en: 'What is your level of familiarity with Domain-Driven Design (DDD)?',
@@ -524,7 +524,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Presença de glossário e vocabulário unificado em código, laudos e bio-ensaios.',
       en: 'Existence of a unified glossary across code, clinical reports, and assays.',
     },
-    category: { pt: 'LINGUAGEM UBÍQUA • +6,25 PTS', en: 'UBIQUITOUS VOCABULARY • +6.25 PTS' },
+    category: { pt: 'LINGUAGEM UBÍQUA', en: 'UBIQUITOUS VOCABULARY' },
     title: {
       pt: 'Existe um vocabulário comum e documentado entre cientistas, clínicos e desenvolvedores no seu time?',
       en: 'Does a common and documented vocabulary exist between scientists, clinicians, and software developers in your team?',
@@ -564,7 +564,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Fronteiras explícitas e desacoplamento arquitetural entre subdomínios bioinformáticos.',
       en: 'Explicit boundaries and architectural decoupling across bioinformatics subdomains.',
     },
-    category: { pt: 'BOUNDED CONTEXTS • +6,25 PTS', en: 'BOUNDED CONTEXTS • +6.25 PTS' },
+    category: { pt: 'BOUNDED CONTEXTS', en: 'BOUNDED CONTEXTS' },
     title: {
       pt: 'Em que medida você concorda com a afirmação:',
       en: 'To what extent do you agree with the statement:',
@@ -601,7 +601,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Garantia de linhagem e auditoria de versões de software, genoma de referência e bancos.',
       en: 'Lineage tracking and auditing for software containers, references, and databases.',
     },
-    category: { pt: 'RASTREABILIDADE DE VERSÕES • +6,25 PTS', en: 'VERSION TRACEABILITY • +6.25 PTS' },
+    category: { pt: 'RASTREABILIDADE DE VERSÕES', en: 'VERSION TRACEABILITY' },
     title: {
       pt: 'Como o seu time registra as versões de pipeline, referência e bancos usados em cada resultado?',
       en: 'How does your team record the versions of pipelines, reference genomes, and annotation databases used for each run result?',
@@ -647,7 +647,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Velocidade e cadência com que usuários finais (biólogos, médicos, pesquisadores) alimentam o time de dev.',
       en: 'Cadence with which end-users feed insights back to developers.',
     },
-    category: { pt: 'FEEDBACK DO USUÁRIO • +6,25 PTS', en: 'USER FEEDBACK • +6.25 PTS' },
+    category: { pt: 'FEEDBACK DO USUÁRIO', en: 'USER FEEDBACK' },
     title: {
       pt: 'Com que frequência o feedback dos usuários finais chega ao time de desenvolvimento?',
       en: 'How frequently does end-user feedback reach the software development team?',
@@ -683,7 +683,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Reflexão aberta sobre a barreira central para excelência em bio-software.',
       en: 'Open synthesis on the core barrier to bio-software excellence.',
     },
-    category: { pt: 'MAIOR OBSTÁCULO • +6,25 PTS', en: 'PRIMARY OBSTACLE • +6.25 PTS' },
+    category: { pt: 'MAIOR OBSTÁCULO', en: 'PRIMARY OBSTACLE' },
     title: {
       pt: 'Qual é, na sua opinião, o maior obstáculo para desenvolver bom software genômico?',
       en: 'In your opinion, what is the biggest obstacle to developing high-quality genomic software?',
@@ -709,7 +709,7 @@ export const SURVEY_QUESTIONS: Question[] = [
       pt: 'Convite voluntário e estritamente opcional para aprofundamento acadêmico.',
       en: 'Voluntary, strictly optional invite for exploratory follow-up.',
     },
-    category: { pt: 'ENTREVISTA VOLUNTÁRIA • +6,25 PTS', en: 'VOLUNTARY INTERVIEW • +6.25 PTS' },
+    category: { pt: 'ENTREVISTA VOLUNTÁRIA', en: 'VOLUNTARY INTERVIEW' },
     title: {
       pt: 'Estaria disponível para uma conversa mais aprofundada para ajudar com a pesquisa?',
       en: 'Would you be available for an in-depth conversation to assist with this research?',

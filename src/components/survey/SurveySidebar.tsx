@@ -1,7 +1,6 @@
 import { Zap } from 'lucide-react';
 import { SECTION_TITLES, SURVEY_QUESTIONS } from '../../data/questions';
 import { translator } from '../../lib/i18n';
-import { TEAMS } from '../../data/teams';
 import type { Language, Question, TeamId } from '../../types/survey';
 import { DnaCanvas } from '../DnaCanvas';
 import { CREST_STYLES, TeamCrest } from '../TeamCrest';
@@ -17,22 +16,15 @@ interface SectionPanelProps {
   team: TeamId | null;
 }
 
-/** Left column: 3D helix, section context and running score. */
+/** Left column: team crest (or helix), section title and description, running score. */
 export function SectionPanel({ question, language, points, team }: SectionPanelProps) {
   const t = translator(language);
   const isScored = question.type !== 'team_select';
 
   return (
     <div className="lg:col-span-3 bg-[#0f121a] border border-slate-800/90 rounded-2xl p-5 flex flex-col shadow-xl">
-      <div className="flex items-center justify-between mb-3 text-[11px] font-mono text-slate-400">
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-900/90 border border-slate-800 text-cyan-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-          CODON_SEQ // RUN_88
-        </span>
-        <span className="text-slate-500 font-mono">SEC_0{question.section}</span>
-      </div>
-
-      <div className="relative w-full h-48 rounded-xl overflow-hidden bg-black/50 border border-slate-800 mb-4">
+      {/* Team crest (or the DNA helix before a team is confirmed), with its glow and no frame */}
+      <div className="relative w-full h-48 mb-4">
         {team ? (
           <div
             className="absolute inset-0 flex items-center justify-center"
@@ -43,12 +35,8 @@ export function SectionPanel({ question, language, points, team }: SectionPanelP
         ) : (
           <DnaCanvas variant="card" />
         )}
-        <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 border border-slate-800 text-[10px] font-mono text-slate-400">
-          {team ? TEAMS[team].tag : '3D HELIX MODEL'}
-        </div>
       </div>
 
-      <div className="text-[11px] font-mono text-slate-400 mb-1 tracking-wider uppercase">{question.sectionStep[language]}</div>
       <h3 className="text-base font-semibold text-white mb-2 leading-snug">{SECTION_TITLES[question.section][language]}</h3>
       <p className="text-xs text-slate-400 leading-relaxed mb-4">{question.sectionDesc[language]}</p>
 

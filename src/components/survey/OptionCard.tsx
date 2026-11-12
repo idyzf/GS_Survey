@@ -1,4 +1,3 @@
-import { Check } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 interface OptionCardProps {
@@ -21,19 +20,6 @@ export function OptionCard({ selected, onSelect, compact = false, children }: Op
     >
       {children}
     </div>
-  );
-}
-
-export function SelectedBadge({ label, plain = false }: { label: string; plain?: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1 text-[11px] font-mono font-bold text-cyan-300 ${
-        plain ? '' : 'bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800'
-      }`}
-    >
-      <Check className="w-3 h-3" />
-      {label}
-    </span>
   );
 }
 
