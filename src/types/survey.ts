@@ -66,6 +66,8 @@ export interface SurveySubmissionPayload {
   otherTeamText?: string;
   answers: Answers;
   language: Language;
+  /** Random id per survey attempt, so a retried request is not counted twice. */
+  clientId?: string;
 }
 
 export interface SubmissionRecord {
@@ -105,10 +107,13 @@ export interface EmailLogEntry {
   team: string;
   points: number;
   htmlBody: string;
+  status?: 'sent' | 'failed';
 }
 
 export interface AdminData {
   submissions: SubmissionRecord[];
   emailLogs: EmailLogEntry[];
   adminEmail: string;
+  /** Link to the Google Sheet, when the backend is configured. */
+  spreadsheetUrl?: string;
 }

@@ -1,13 +1,13 @@
-// Browser-only persistence, used when the API is unreachable (e.g. on GitHub Pages).
+// Browser-only persistence, used when no backend URL is configured (local development / demos).
 import { DEFAULT_ADMIN_EMAIL } from '../config';
 import { buildNotificationEmail } from './notification';
-import { applySubmission, createSubmission, seedScores } from './scoring';
+import { applySubmission, createSubmission, emptyScores } from './scoring';
 import type { AdminData, SubmissionRecord, SurveySubmissionPayload, TeamScores } from '../types/survey';
 
 const KEYS = {
-  scores: 'genomics_survey_teams',
-  submissions: 'genomics_survey_submissions',
-  emailLogs: 'genomics_survey_email_logs',
+  scores: 'genomics_survey_v2_scores',
+  submissions: 'genomics_survey_v2_submissions',
+  emailLogs: 'genomics_survey_v2_email_logs',
 };
 const MAX_STORED = 50;
 
@@ -28,7 +28,7 @@ function write(key: string, value: unknown): void {
   }
 }
 
-export const getLocalScores = (): TeamScores => ({ ...seedScores(), ...read(KEYS.scores, {}) });
+export const getLocalScores = (): TeamScores => ({ ...emptyScores(), ...read(KEYS.scores, {}) });
 
 export function recordLocalSubmission(payload: SurveySubmissionPayload): SubmissionRecord {
   const submission = createSubmission(payload);
@@ -48,11 +48,3 @@ export const getLocalAdminData = (): AdminData => ({
   emailLogs: read(KEYS.emailLogs, []),
   adminEmail: DEFAULT_ADMIN_EMAIL,
 });
-
-export function resetLocalData(): void {
-  try {
-    Object.values(KEYS).forEach((key) => localStorage.removeItem(key));
-  } catch {
-    // ignore
-  }
-}

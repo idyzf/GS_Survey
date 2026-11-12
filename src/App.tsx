@@ -21,6 +21,13 @@ export default function App() {
     try {
       setLatestSubmission(await submitSurvey(payload));
       setView('results');
+    } catch (err) {
+      console.error('Submission failed', err);
+      alert(
+        language === 'pt'
+          ? 'Não foi possível enviar suas respostas. Verifique sua conexão e tente novamente — nada foi perdido.'
+          : 'Could not submit your answers. Check your connection and try again — nothing was lost.'
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -1,4 +1,4 @@
-// Survey scoring and leaderboard rules. Shared by the browser and the Express server.
+// Survey scoring and leaderboard rules. Shared by the browser and the Apps Script backend.
 import { TEAMS, TEAM_IDS } from '../data/teams';
 import type {
   Answer,
@@ -28,10 +28,10 @@ export function countAnswered(answers: Answers): number {
   return SCORED_QUESTION_IDS.filter((id) => isAnswered(answers[id])).length;
 }
 
+/** Readable unique-enough id (not security sensitive). Works in browsers and Apps Script. */
 export function randomId(prefix: string): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(3));
-  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-  return `${prefix}-${Date.now().toString(36)}-${hex}`.toUpperCase();
+  const rand = Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+  return `${prefix}-${Date.now().toString(36)}-${rand}`.toUpperCase();
 }
 
 /** Normalizes the raw payload into the record that gets stored. */
@@ -63,10 +63,9 @@ export function createSubmission(payload: SurveySubmissionPayload): SubmissionRe
   };
 }
 
-export function seedScores(): TeamScores {
-  return Object.fromEntries(
-    TEAM_IDS.map((id) => [id, { points: TEAMS[id].seedPoints, participantsCount: TEAMS[id].seedParticipants }])
-  ) as TeamScores;
+/** Every team starts at zero: the leaderboard only reflects real participation. */
+export function emptyScores(): TeamScores {
+  return Object.fromEntries(TEAM_IDS.map((id) => [id, { points: 0, participantsCount: 0 }])) as TeamScores;
 }
 
 export function applySubmission(scores: TeamScores, submission: SubmissionRecord): void {
@@ -80,8 +79,8 @@ export function buildLeaderboard(scores: TeamScores): LeaderboardEntry[] {
     id,
     name: TEAMS[id].name,
     subtitle: TEAMS[id].subtitle,
-    points: scores[id]?.points ?? TEAMS[id].seedPoints,
-    participantsCount: scores[id]?.participantsCount ?? TEAMS[id].seedParticipants,
+    points: scores[id]?.points ?? 0,
+    participantsCount: scores[id]?.participantsCount ?? 0,
     rank: 0,
   }))
     .sort((a, b) => b.points - a.points)

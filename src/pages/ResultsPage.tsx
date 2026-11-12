@@ -23,8 +23,12 @@ export function ResultsPage({ language, latestSubmission, onRetake }: ResultsPag
   const [copied, setCopied] = useState(false);
 
   const refresh = useCallback(async () => {
-    setTeams(await fetchLeaderboard());
-    setLastRefreshed(new Date().toLocaleTimeString());
+    try {
+      setTeams(await fetchLeaderboard());
+      setLastRefreshed(new Date().toLocaleTimeString());
+    } catch (err) {
+      console.warn('Leaderboard refresh failed; keeping last values', err);
+    }
   }, []);
 
   useEffect(() => {

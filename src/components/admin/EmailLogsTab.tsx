@@ -45,7 +45,10 @@ export function EmailLogsTab({ language, emailLogs, adminEmail }: EmailLogsTabPr
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span
+                      className={`w-2 h-2 rounded-full ${log.status === 'failed' ? 'bg-rose-400' : 'bg-emerald-400'}`}
+                      title={log.status === 'failed' ? t('Falha no envio', 'Send failed') : undefined}
+                    />
                     <span className="text-xs font-mono font-bold text-white">{log.subject}</span>
                   </div>
                   <span className="text-[11px] font-mono text-slate-400">{new Date(log.timestamp).toLocaleString()}</span>

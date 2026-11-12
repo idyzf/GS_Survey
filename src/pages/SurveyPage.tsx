@@ -22,6 +22,7 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
   const [otherTeamText, setOtherTeamText] = useState('');
   const [answers, setAnswers] = useState<Answers>({});
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
+  const [clientId] = useState(() => crypto.randomUUID());
 
   const question = SURVEY_QUESTIONS[index];
   const isTeamQuestion = question.type === 'team_select';
@@ -41,7 +42,7 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
       alert(t('Por favor, selecione sua equipe para iniciar a survey!', 'Please select your team before proceeding!'));
       return;
     }
-    if (isLast) onComplete({ selectedTeam, otherTeamText, answers, language });
+    if (isLast) onComplete({ selectedTeam, otherTeamText, answers, language, clientId });
     else goTo(index + 1);
   };
 

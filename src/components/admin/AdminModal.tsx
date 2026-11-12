@@ -1,7 +1,7 @@
-import { Database, FileSpreadsheet, Mail, RotateCcw, X } from 'lucide-react';
+import { Database, ExternalLink, FileSpreadsheet, KeyRound, Mail, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_ADMIN_EMAIL } from '../../config';
-import { fetchAdminData, resetData } from '../../lib/api';
+import { fetchAdminData, hasBackend, UnauthorizedError } from '../../lib/api';
 import { downloadFile, submissionsToCsv } from '../../lib/download';
 import { translator } from '../../lib/i18n';
 import type { AdminData, Language } from '../../types/survey';
@@ -17,38 +17,50 @@ interface AdminModalProps {
 }
 
 const EMPTY: AdminData = { submissions: [], emailLogs: [], adminEmail: DEFAULT_ADMIN_EMAIL };
+const KEY_STORAGE = 'genomics_survey_admin_key';
+
+const storedKey = () => {
+  try {
+    return sessionStorage.getItem(KEY_STORAGE) ?? '';
+  } catch {
+    return '';
+  }
+};
 
 export function AdminModal({ language, isOpen, onClose }: AdminModalProps) {
   const t = translator(language);
   const [tab, setTab] = useState<Tab>('submissions');
   const [data, setData] = useState<AdminData>(EMPTY);
-  const [message, setMessage] = useState<string | null>(null);
+  const [adminKey, setAdminKey] = useState(storedKey);
+  const [keyInput, setKeyInput] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const locked = hasBackend && !adminKey;
 
-  const load = useCallback(async () => setData(await fetchAdminData()), []);
+  const load = useCallback(async () => {
+    if (hasBackend && !adminKey) return;
+    try {
+      setData(await fetchAdminData(adminKey));
+      setError(null);
+      try {
+        sessionStorage.setItem(KEY_STORAGE, adminKey);
+      } catch {
+        // ignore
+      }
+    } catch (err) {
+      if (err instanceof UnauthorizedError) {
+        setAdminKey('');
+        setError(t('Chave de acesso inválida.', 'Invalid access key.'));
+      } else {
+        setError(t('Não foi possível carregar os dados.', 'Could not load data.'));
+      }
+    }
+  }, [adminKey]);
 
   useEffect(() => {
     if (isOpen) load();
   }, [isOpen, load]);
 
   if (!isOpen) return null;
-
-  const handleReset = async () => {
-    const ok = confirm(
-      t(
-        'Tem certeza de que deseja resetar os dados para as pontuações de referência iniciais do consórcio?',
-        'Are you sure you want to reset data to initial consortium benchmarks?'
-      )
-    );
-    if (!ok) return;
-    const onServer = await resetData();
-    setMessage(
-      onServer
-        ? t('Banco de dados restaurado!', 'Database reset successfully!')
-        : t('Banco de dados restaurado localmente!', 'Database reset locally successfully!')
-    );
-    load();
-    setTimeout(() => setMessage(null), 3000);
-  };
 
   const tabs: { id: Tab; label: string; icon?: typeof Database; active: string }[] = [
     {
@@ -65,7 +77,7 @@ export function AdminModal({ language, isOpen, onClose }: AdminModalProps) {
     },
     {
       id: 'settings',
-      label: t('Configurações & Reset', 'Settings & Reset'),
+      label: t('Configurações', 'Settings'),
       active: 'bg-slate-800 text-slate-200 border border-slate-700',
     },
   ];
@@ -93,84 +105,138 @@ export function AdminModal({ language, isOpen, onClose }: AdminModalProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() =>
-                downloadFile('genomics_survey_submissions.csv', submissionsToCsv(data.submissions), 'text/csv;charset=utf-8')
-              }
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs font-mono text-cyan-300 hover:text-white hover:bg-slate-800 transition-colors"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>{t('Exportar CSV', 'Export CSV')}</span>
-            </button>
+            {!locked && (
+              <button
+                onClick={() =>
+                  downloadFile('genomics_survey_submissions.csv', submissionsToCsv(data.submissions), 'text/csv;charset=utf-8')
+                }
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs font-mono text-cyan-300 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>{t('Exportar CSV', 'Export CSV')}</span>
+              </button>
+            )}
             <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex items-center gap-2 px-6 py-2 border-b border-slate-800/80 bg-[#090b10] text-xs font-mono">
-          {tabs.map(({ id, label, icon: Icon, active }) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
-                tab === id ? `${active} font-semibold` : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {Icon && <Icon className="w-3.5 h-3.5" />}
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-
-        {message && (
-          <div className="mx-6 mt-3 p-2.5 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs font-mono">
-            {message}
-          </div>
-        )}
-
-        <div className="flex-1 overflow-y-auto p-6">
-          {tab === 'submissions' && <SubmissionsTab language={language} submissions={data.submissions} onReload={load} />}
-          {tab === 'emails' && <EmailLogsTab language={language} emailLogs={data.emailLogs} adminEmail={data.adminEmail} />}
-          {tab === 'settings' && (
-            <div className="space-y-6 max-w-2xl text-xs">
-              <div className="p-5 rounded-xl bg-[#0f121a] border border-slate-800">
-                <h4 className="text-sm font-bold text-white mb-2">
-                  {t('Endereço Administrativo de Notificação', 'Notification Admin Address')}
-                </h4>
-                <p className="text-slate-400 mb-3 leading-relaxed">
-                  {t(
-                    'E-mail que recebe os relatórios completos a cada submissão (definido no backend em ADMIN_EMAIL):',
-                    'Email that receives full reports on every survey completion (configured via ADMIN_EMAIL):'
-                  )}
-                </p>
-                <div className="p-3 rounded-lg bg-black/60 border border-slate-800 font-mono text-cyan-300 font-bold">
-                  {data.adminEmail}
-                </div>
+        {locked ? (
+          <form
+            className="flex-1 flex items-center justify-center p-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setAdminKey(keyInput.trim());
+              setKeyInput('');
+            }}
+          >
+            <div className="w-full max-w-sm p-6 rounded-xl bg-[#0f121a] border border-slate-800 text-xs">
+              <div className="flex items-center gap-2 text-sm font-bold text-white mb-2">
+                <KeyRound className="w-4 h-4 text-cyan-400" />
+                <span>{t('Acesso restrito', 'Restricted access')}</span>
               </div>
-
-              <div className="p-5 rounded-xl bg-[#0f121a] border border-slate-800">
-                <h4 className="text-sm font-bold text-white mb-2">
-                  {t('Restaurar Dados Iniciais de Benchmark', 'Reset to Initial Benchmarks')}
-                </h4>
-                <p className="text-slate-400 mb-4 leading-relaxed">
-                  {t(
-                    'Restaura o placar para as pontuações de referência do consórcio apresentadas no layout inicial.',
-                    'Resets the leaderboard to the initial consortium benchmark scores displayed in the layout design.'
-                  )}
-                </p>
-                <button
-                  onClick={handleReset}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 hover:bg-rose-900/80 transition-colors font-mono font-semibold"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>{t('Restaurar Benchmarks Iniciais', 'Reset Database')}</span>
-                </button>
-              </div>
+              <p className="text-slate-400 mb-4 leading-relaxed">
+                {t(
+                  'Informe a chave de administrador (ADMIN_KEY) enviada no e-mail de configuração do backend.',
+                  'Enter the admin key (ADMIN_KEY) sent in the backend setup email.'
+                )}
+              </p>
+              <input
+                type="password"
+                value={keyInput}
+                onChange={(e) => setKeyInput(e.target.value)}
+                autoFocus
+                className="w-full px-3 py-2 mb-3 bg-slate-900 border border-slate-800 rounded-lg text-white font-mono focus:outline-none focus:border-cyan-400"
+              />
+              {error && <p className="text-rose-400 mb-3">{error}</p>}
+              <button
+                type="submit"
+                disabled={!keyInput.trim()}
+                className="w-full py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-bold disabled:opacity-50"
+              >
+                {t('Entrar', 'Unlock')}
+              </button>
             </div>
-          )}
-        </div>
+          </form>
+        ) : (
+          <>
+            {/* Tabs */}
+            <div className="flex items-center gap-2 px-6 py-2 border-b border-slate-800/80 bg-[#090b10] text-xs font-mono">
+              {tabs.map(({ id, label, icon: Icon, active }) => (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
+                    tab === id ? `${active} font-semibold` : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {Icon && <Icon className="w-3.5 h-3.5" />}
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+
+            {error && (
+              <div className="mx-6 mt-3 p-2.5 rounded bg-rose-950/80 border border-rose-800 text-rose-300 text-xs font-mono">
+                {error}
+              </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {tab === 'submissions' && <SubmissionsTab language={language} submissions={data.submissions} onReload={load} />}
+              {tab === 'emails' && <EmailLogsTab language={language} emailLogs={data.emailLogs} adminEmail={data.adminEmail} />}
+              {tab === 'settings' && (
+                <div className="space-y-6 max-w-2xl text-xs">
+                  <div className="p-5 rounded-xl bg-[#0f121a] border border-slate-800">
+                    <h4 className="text-sm font-bold text-white mb-2">
+                      {t('Endereço Administrativo de Notificação', 'Notification Admin Address')}
+                    </h4>
+                    <p className="text-slate-400 mb-3 leading-relaxed">
+                      {t(
+                        'E-mail que recebe os relatórios completos a cada submissão (propriedade ADMIN_EMAIL do Apps Script):',
+                        'Email that receives full reports on every survey completion (ADMIN_EMAIL Apps Script property):'
+                      )}
+                    </p>
+                    <div className="p-3 rounded-lg bg-black/60 border border-slate-800 font-mono text-cyan-300 font-bold">
+                      {data.adminEmail}
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-xl bg-[#0f121a] border border-slate-800">
+                    <h4 className="text-sm font-bold text-white mb-2">{t('Planilha de Respostas', 'Responses Spreadsheet')}</h4>
+                    {data.spreadsheetUrl ? (
+                      <>
+                        <p className="text-slate-400 mb-4 leading-relaxed">
+                          {t(
+                            'Todas as respostas e e-mails enviados ficam registrados na Google Sheet do backend.',
+                            'Every response and sent email is recorded in the backend Google Sheet.'
+                          )}
+                        </p>
+                        <a
+                          href={data.spreadsheetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:bg-emerald-900/80 transition-colors font-mono font-semibold"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>{t('Abrir planilha', 'Open spreadsheet')}</span>
+                        </a>
+                      </>
+                    ) : (
+                      <p className="text-slate-400 leading-relaxed">
+                        {t(
+                          'Modo local: nenhum backend configurado (VITE_API_URL). As respostas ficam apenas neste navegador.',
+                          'Local mode: no backend configured (VITE_API_URL). Responses stay in this browser only.'
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
