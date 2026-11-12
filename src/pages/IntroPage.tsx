@@ -77,8 +77,8 @@ export function IntroPage({ language, onLanguageChange, onContinue, onBack }: In
             <Mail className="w-4 h-4 text-pink-400 shrink-0 mt-0.5" />
             <span>
               {t(
-                'Contato opcional: ao final da survey, quem tiver interesse em contribuir mais com o estudo pode informar um e-mail de contato. Não é obrigatório — se preferir não informar, sua participação continua totalmente anônima.',
-                'Optional contact: at the end of the survey, if you would like to contribute further to the study, you can leave a contact email. It is not required — if you prefer not to, your participation remains fully anonymous.'
+                'Contato opcional: ao final da survey, quem tiver interesse em contribuir mais com o estudo pode informar um e-mail de contato. Não é obrigatório, se preferir não informar, sua participação continua totalmente anônima.',
+                'Optional contact: at the end of the survey, if you would like to contribute further to the study, you can leave a contact email. It is not required, if you prefer not to, your participation remains fully anonymous.'
               )}
             </span>
           </div>
