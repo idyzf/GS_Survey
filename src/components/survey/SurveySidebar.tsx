@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Zap } from 'lucide-react';
 import { SECTION_TITLES, SURVEY_QUESTIONS } from '../../data/questions';
 import { translator } from '../../lib/i18n';
@@ -24,13 +25,16 @@ export function SectionPanel({ question, language, points, team }: SectionPanelP
   return (
     <div className="lg:col-span-3 bg-[#0f121a] border border-slate-800/90 rounded-2xl p-5 flex flex-col shadow-xl">
       {/* Team crest (or the DNA helix before a team is confirmed), with its glow and no frame */}
-      <div className="relative w-full h-48 mb-4">
+      <div className="relative w-full flex-1 min-h-48 mb-4">
         {team ? (
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ background: `radial-gradient(circle at 50% 45%, ${CREST_STYLES[team].accent}26, transparent 65%)` }}
-          >
-            <TeamCrest team={team} className="h-36 animate-crest-float" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            {/* Fixed-size circular glow, so it keeps its shape however tall the card gets */}
+            <div
+              className="w-60 h-60 flex items-center justify-center"
+              style={{ background: `radial-gradient(closest-side, ${CREST_STYLES[team].accent}2e, transparent)` }}
+            >
+              <TeamCrest team={team} className="h-36 animate-crest-float" />
+            </div>
           </div>
         ) : (
           <DnaCanvas variant="card" />
@@ -73,11 +77,13 @@ export function ProgressRail({ questionId, language }: { questionId: number; lan
         {String(questionId).padStart(2, '0')} <span className="text-xs text-slate-500">/{TOTAL}</span>
       </span>
 
-      <div className="relative flex flex-col items-center gap-3">
-        {RAIL_STEPS.map((step) => (
-          <div key={step} className="flex flex-col items-center">
+      {/* Connectors grow so the steps spread over the rail's full height. */}
+      <div className="flex-1 flex flex-col items-center">
+        {RAIL_STEPS.map((step, i) => (
+          <Fragment key={step}>
+            {i > 0 && <div className="w-0.5 flex-1 min-h-9 my-1 bg-slate-800" />}
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all ${
+              className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all ${
                 questionId === step
                   ? 'border-2 border-cyan-400 bg-cyan-950 text-cyan-300 shadow-lg shadow-cyan-400/30 ring-2 ring-cyan-500/20'
                   : questionId > step
@@ -87,12 +93,11 @@ export function ProgressRail({ questionId, language }: { questionId: number; lan
             >
               {step}
             </div>
-            {step < TOTAL && <div className="w-0.5 h-6 bg-slate-800 my-1" />}
-          </div>
+          </Fragment>
         ))}
       </div>
 
-      <span className="mt-8 text-[11px] font-mono text-cyan-400 font-semibold">
+      <span className="mt-6 text-[11px] font-mono text-cyan-400 font-semibold">
         {Math.round((questionId / TOTAL) * 100)}%
       </span>
       <span className="text-[9px] font-mono text-slate-400">{language === 'pt' ? 'CONCLUÍDO' : 'COMPLETED'}</span>
