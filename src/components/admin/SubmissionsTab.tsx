@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 import { useState } from 'react';
+import { describeAnswer, SCORED_QUESTIONS } from '../../lib/answerText';
 import { translator } from '../../lib/i18n';
 import { MAX_SCORED, POINTS_PER_QUESTION } from '../../lib/scoring';
 import type { Language, SubmissionRecord } from '../../types/survey';
@@ -97,29 +98,27 @@ export function SubmissionsTab({ language, submissions, onReload }: SubmissionsT
           </div>
 
           <div className="space-y-2 text-xs font-mono max-h-60 overflow-y-auto">
-            {Object.entries(selected.answers ?? {}).map(([id, answer]) => (
-              <div
-                key={id}
-                className="p-2.5 rounded bg-slate-900/60 border border-slate-800 flex items-start justify-between gap-4"
-              >
-                <span className="text-cyan-400 font-bold shrink-0">Q{id}:</span>
-                <div className="flex-1 text-slate-300">
-                  {answer.isSkipped ? (
-                    <span className="text-slate-400 italic">(Pergunta pulada - 0 pts)</span>
-                  ) : answer.value && typeof answer.value === 'object' ? (
-                    <pre className="text-[11px] whitespace-pre-wrap">{JSON.stringify(answer.value, null, 2)}</pre>
-                  ) : (
-                    <span>{String(answer.value || answer.textDetail || 'Respondido')}</span>
-                  )}
-                  {answer.textDetail && answer.textDetail !== answer.value && (
-                    <div className="text-[11px] text-slate-400 mt-1">Detalhe: {answer.textDetail}</div>
-                  )}
+            {SCORED_QUESTIONS.map((q) => {
+              const answer = selected.answers?.[q.id];
+              const skipped = !answer || answer.isSkipped;
+              return (
+                <div
+                  key={q.id}
+                  className="p-2.5 rounded bg-slate-900/60 border border-slate-800 flex items-start justify-between gap-4"
+                >
+                  <span className="text-cyan-400 font-bold shrink-0">Q{q.id}:</span>
+                  <div className="flex-1 text-slate-300">
+                    <div className="text-[11px] text-slate-500 mb-1">{q.title[language]}</div>
+                    {skipped ? (
+                      <span className="text-slate-400 italic">(Pergunta pulada - 0 pts)</span>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{describeAnswer(q, answer, language)}</span>
+                    )}
+                  </div>
+                  <span className="shrink-0 text-slate-400">{skipped ? '0 pts' : `+${POINTS_PER_QUESTION} pts`}</span>
                 </div>
-                <span className="shrink-0 text-slate-400">
-                  {answer.isSkipped ? '0 pts' : `+${POINTS_PER_QUESTION} pts`}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

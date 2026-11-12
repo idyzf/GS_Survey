@@ -1,12 +1,11 @@
 import { CheckCircle2, Download } from 'lucide-react';
-import { SURVEY_QUESTIONS } from '../../data/questions';
 import { TEAMS } from '../../data/teams';
+import { describeAnswer, SCORED_QUESTIONS } from '../../lib/answerText';
 import { downloadFile } from '../../lib/download';
 import { translator } from '../../lib/i18n';
 import { MAX_SCORED } from '../../lib/scoring';
 import type { Language, SubmissionRecord } from '../../types/survey';
 
-const SCORED_QUESTIONS = SURVEY_QUESTIONS.slice(1);
 const THANK_YOU =
   'Thank you for participating in our survey! Your contribution is valuable in helping us better understand the genomics software development landscape.';
 
@@ -83,10 +82,7 @@ export function Scorecard({ language, submission }: { language: Language; submis
         {SCORED_QUESTIONS.map((q, i) => {
           const answer = submission?.answers[q.id];
           const answered = answer && !answer.isSkipped;
-          const summary =
-            answer?.value && typeof answer.value === 'object'
-              ? 'Valores Registrados'
-              : String(answer?.textDetail || answer?.value || '');
+          const summary = describeAnswer(q, answer, language);
 
           return (
             <div
