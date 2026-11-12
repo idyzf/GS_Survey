@@ -76,8 +76,8 @@ export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLead
 
           <p className="mt-[clamp(1rem,2.5vh,1.75rem)] text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-xl">
             {t(
-              'Acelerando descobertas disruptivas em pipelines de bioinformática, genômica em nuvem e arquiteturas de medicina de precisão.',
-              'Accelerating disruptive discoveries in bioinformatics pipelines, cloud genomics, and precision medicine architectures.'
+              'Pesquisa de TCC do MBA em Engenharia de Software sobre como profissionais desenvolvem software genômico, da engenharia de requisitos aos pipelines de bioinformática.',
+              'An MBA in Software Engineering thesis survey on how professionals build genomic software, from requirements engineering to bioinformatics pipelines.'
             )}
           </p>
 
