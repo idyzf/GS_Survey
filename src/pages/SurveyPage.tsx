@@ -1,7 +1,8 @@
 import { AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { QuestionInput, TeamSelect } from '../components/survey/QuestionInput';
 import { ProgressRail, SectionPanel } from '../components/survey/SurveySidebar';
+import { TeamWelcomeModal } from '../components/survey/TeamWelcomeModal';
 import { SURVEY_QUESTIONS } from '../data/questions';
 import { TEAMS } from '../data/teams';
 import { translator } from '../lib/i18n';
@@ -23,6 +24,9 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
   const [answers, setAnswers] = useState<Answers>({});
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
   const [clientId] = useState(() => crypto.randomUUID());
+  // Team confirmed by leaving question 1; drives the pop-up and the crest in the side card.
+  const [confirmedTeam, setConfirmedTeam] = useState<TeamId | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const question = SURVEY_QUESTIONS[index];
   const isTeamQuestion = question.type === 'team_select';
@@ -42,6 +46,10 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
       alert(t('Por favor, selecione sua equipe para iniciar a survey!', 'Please select your team before proceeding!'));
       return;
     }
+    if (isTeamQuestion && selectedTeam !== confirmedTeam) {
+      setConfirmedTeam(selectedTeam);
+      setShowWelcome(true);
+    }
     if (isLast) onComplete({ selectedTeam, otherTeamText, answers, language, clientId });
     else goTo(index + 1);
   };
@@ -51,6 +59,8 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
     setShowSkipConfirm(false);
     handleNext();
   };
+
+  const closeWelcome = useCallback(() => setShowWelcome(false), []);
 
   const handlePrev = () => (index > 0 ? goTo(index - 1) : onCancel());
 
@@ -94,7 +104,12 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <SectionPanel question={question} language={language} points={points} />
+          <SectionPanel
+            question={question}
+            language={language}
+            points={points}
+            team={isTeamQuestion ? null : confirmedTeam}
+          />
           <ProgressRail questionId={question.id} language={language} />
 
           {/* Question */}
@@ -196,6 +211,10 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
           </div>
         </div>
       </div>
+
+      {showWelcome && confirmedTeam && (
+        <TeamWelcomeModal team={confirmedTeam} language={language} onClose={closeWelcome} />
+      )}
     </div>
   );
 }

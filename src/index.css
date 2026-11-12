@@ -62,3 +62,15 @@
   pointer-events: none;
   box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
 }
+
+/* Gentle floating motion for the team crest */
+@keyframes crest-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-crest-float {
+  animation: crest-float 4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-crest-float { animation: none; }
+}
