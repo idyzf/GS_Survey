@@ -1,6 +1,10 @@
 /// <reference types="vite/client" />
 
-declare module '*.glb' {
-  const src: string;
-  export default src;
+interface ImportMetaEnv {
+  /** Google Apps Script web app URL (…/exec). Unset = localStorage-only mode. */
+  readonly VITE_API_URL?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }

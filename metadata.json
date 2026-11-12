@@ -1,6 +1,0 @@
-{
-  "name": "Genomics Software Survey - Team Gamification & Live Leaderboard",
-  "description": "Plataforma interativa e anônima de survey para engenharia de software genômico com pontuação por equipes, visualização 3D de DNA, ranking em tempo real e notificações automáticas.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

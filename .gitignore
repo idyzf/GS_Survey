@@ -1,10 +1,10 @@
 node_modules/
-build/
 dist/
+backend/dist/
 coverage/
 .DS_Store
 *.log
 .env*
 !.env.example
-data/*.json
-!data/.gitkeep
+# Local data from the former Express server
+data/
