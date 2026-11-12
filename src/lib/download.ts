@@ -1,5 +1,4 @@
-import { formatAnswer } from './notification';
-import { SCORED_QUESTION_IDS } from './scoring';
+import { RESPONSE_COLUMNS } from './answerText';
 import type { SubmissionRecord } from '../types/survey';
 
 export function downloadFile(filename: string, content: string, type: string): void {
@@ -24,7 +23,7 @@ export function submissionsToCsv(submissions: SubmissionRecord[]): string {
     'Questions Skipped',
     'Email Contact (Q17)',
     'Language',
-    ...SCORED_QUESTION_IDS.map((id) => `Q${id}_Answer`),
+    ...RESPONSE_COLUMNS.map((c) => c.header),
   ];
   const rows = submissions.map((s) =>
     [
@@ -37,11 +36,9 @@ export function submissionsToCsv(submissions: SubmissionRecord[]): string {
       s.skippedCount,
       quote(s.emailContact ?? ''),
       quote(s.language),
-      ...SCORED_QUESTION_IDS.map((id) => {
-        const answer = s.answers?.[id];
-        return !answer || answer.isSkipped ? 'SKIPPED' : quote(formatAnswer(answer));
-      }),
+      ...RESPONSE_COLUMNS.map((c) => quote(c.value(s.answers ?? {}))),
     ].join(',')
   );
-  return [headers.join(','), ...rows].join('\n');
+  // BOM so Excel opens the accents correctly.
+  return '\uFEFF' + [headers.map(quote).join(','), ...rows].join('\n');
 }

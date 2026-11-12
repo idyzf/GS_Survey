@@ -3,7 +3,8 @@
 // emails the admin, and serves the live leaderboard. Bundled by scripts/build-backend.mjs.
 import { DEFAULT_ADMIN_EMAIL } from '../src/config';
 import { TEAMS } from '../src/data/teams';
-import { buildNotificationEmail, formatAnswer } from '../src/lib/notification';
+import { RESPONSE_COLUMNS } from '../src/lib/answerText';
+import { buildNotificationEmail } from '../src/lib/notification';
 import { SCORED_QUESTION_IDS, buildLeaderboard, createSubmission, emptyScores } from '../src/lib/scoring';
 import type {
   AdminData,
@@ -20,29 +21,39 @@ type GetEvent = GoogleAppsScript.Events.DoGet;
 type PostEvent = GoogleAppsScript.Events.DoPost;
 type Output = GoogleAppsScript.Content.TextOutput;
 
+/**
+ * Metadata columns of the "Respostas" tab. Rows are read by header name, and the second
+ * name of each entry is the header used by earlier versions (kept so old rows still load).
+ */
+const META = {
+  id: ['ID da resposta', 'Submission ID'],
+  timestamp: ['Data/hora', 'Timestamp'],
+  team: ['Equipe (ID)', 'Team ID'],
+  teamName: ['Q1 – Equipe', 'Team Name'],
+  other: ['Q1 – Outra área', 'Other Team'],
+  points: ['Pontos', 'Total Points'],
+  answered: ['Respondidas', 'Answered'],
+  skipped: ['Puladas', 'Skipped'],
+  language: ['Idioma', 'Language'],
+  contact: ['E-mail de contato (Q17)', 'Email Contact'],
+  answersJson: ['Respostas (JSON)', 'Answers JSON'],
+} as const;
+type MetaField = keyof typeof META;
+type SheetRecord = Record<string, unknown>;
+
 const RESPONSES = {
   name: 'Respostas',
   headers: [
-    'Submission ID',
-    'Timestamp',
-    'Team ID',
-    'Team Name',
-    'Other Team',
-    'Total Points',
-    'Answered',
-    'Skipped',
-    'Language',
-    'Email Contact',
-    ...SCORED_QUESTION_IDS.map((id) => `Q${id}`),
-    'Answers JSON',
+    ...(Object.keys(META) as MetaField[]).filter((f) => f !== 'answersJson').map((f) => META[f][0]),
+    // One readable column per question (and per likert item), then the raw answers for the app.
+    ...RESPONSE_COLUMNS.map((c) => c.header),
+    META.answersJson[0],
   ],
 };
 const EMAILS = {
   name: 'E-mails',
   headers: ['Email ID', 'Timestamp', 'To', 'Subject', 'Submission ID', 'Team', 'Points', 'Status', 'HTML'],
 };
-// Column positions (0-based) used when reading rows back.
-const COL = { id: 0, timestamp: 1, team: 2, teamName: 3, other: 4, points: 5, answered: 6, skipped: 7, language: 8, contact: 9 };
 
 const MAX_BODY_CHARS = 100_000;
 const MAX_TEXT_CHARS = 2_000;
@@ -80,7 +91,7 @@ export function doPost(e: PostEvent): Output {
 
 /** Run once from the Apps Script editor: creates the tabs, an admin key, and sends a test email. */
 export function setup(): void {
-  getSheet(RESPONSES);
+  getResponsesSheet();
   getSheet(EMAILS);
   const props = PropertiesService.getScriptProperties();
   if (!props.getProperty('ADMIN_KEY')) props.setProperty('ADMIN_KEY', Utilities.getUuid());
@@ -107,7 +118,7 @@ function submit(raw: unknown): SubmissionRecord {
   const lock = LockService.getScriptLock();
   lock.waitLock(20_000);
   try {
-    getSheet(RESPONSES).appendRow(toResponseRow(submission));
+    getResponsesSheet().appendRow(toResponseRow(submission));
   } finally {
     lock.releaseLock();
   }
@@ -139,10 +150,10 @@ function getLeaderboard(): LeaderboardEntry[] {
   if (cached) return JSON.parse(cached) as LeaderboardEntry[];
 
   const scores = emptyScores();
-  for (const row of readRows(RESPONSES.name)) {
-    const score = scores[row[COL.team] as TeamId];
+  for (const record of readRecords(RESPONSES.name)) {
+    const score = scores[field(record, 'team') as TeamId];
     if (!score) continue;
-    score.points += Number(row[COL.points]) || 0;
+    score.points += Number(field(record, 'points')) || 0;
     score.participantsCount += 1;
   }
   const leaderboard = buildLeaderboard(scores);
@@ -151,21 +162,7 @@ function getLeaderboard(): LeaderboardEntry[] {
 }
 
 function getAdminData(): AdminData {
-  const submissions = readRows(RESPONSES.name)
-    .map((row): SubmissionRecord => ({
-      id: String(row[COL.id]),
-      timestamp: toIso(row[COL.timestamp]),
-      selectedTeam: row[COL.team] as TeamId,
-      teamName: String(row[COL.teamName]),
-      otherTeamText: String(row[COL.other]) || undefined,
-      totalPoints: Number(row[COL.points]) || 0,
-      answeredCount: Number(row[COL.answered]) || 0,
-      skippedCount: Number(row[COL.skipped]) || 0,
-      language: row[COL.language] === 'en' ? 'en' : 'pt',
-      emailContact: String(row[COL.contact]) || undefined,
-      answers: parseAnswers(row[row.length - 1]),
-    }))
-    .reverse();
+  const submissions = readRecords(RESPONSES.name).map(toSubmission).reverse();
 
   const emailLogs = readRows(EMAILS.name)
     .map(
@@ -230,6 +227,59 @@ function getSheet({ name, headers }: { name: string; headers: string[] }): Googl
   return sheet;
 }
 
+/**
+ * Returns the "Respostas" tab, rewriting it in the current column layout if it was created
+ * by an earlier version (a backup copy of the old tab is kept). Call while holding the lock.
+ */
+function getResponsesSheet(): GoogleAppsScript.Spreadsheet.Sheet {
+  const sheet = getSheet(RESPONSES);
+  const width = Math.max(sheet.getLastColumn(), 1);
+  const current = sheet.getRange(1, 1, 1, width).getValues()[0].map(String);
+  if (current.join('\u0001') === RESPONSES.headers.join('\u0001')) return sheet;
+
+  const submissions = readRecords(RESPONSES.name).map(toSubmission);
+  if (submissions.length) {
+    const stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+    sheet.copyTo(SpreadsheetApp.getActiveSpreadsheet()).setName(`${RESPONSES.name} (backup ${stamp})`);
+  }
+  const rows = [RESPONSES.headers, ...submissions.map(toResponseRow)];
+  sheet.clear();
+  sheet.getRange(1, 1, rows.length, RESPONSES.headers.length).setValues(rows);
+  sheet.setFrozenRows(1);
+  sheet.getRange(1, 1, 1, RESPONSES.headers.length).setFontWeight('bold');
+  return sheet;
+}
+
+/** Data rows as objects keyed by the header row, so lookups survive column changes. */
+function readRecords(name: string): SheetRecord[] {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  const [header, ...rows] = sheet.getRange(1, 1, sheet.getLastRow(), sheet.getLastColumn()).getValues();
+  return rows.map((row) => Object.fromEntries(header.map((h, i) => [String(h), row[i]])));
+}
+
+function field(record: SheetRecord, name: MetaField): unknown {
+  for (const header of META[name]) if (header in record) return record[header];
+  return '';
+}
+
+function toSubmission(record: SheetRecord): SubmissionRecord {
+  const text = (name: MetaField) => String(field(record, name) ?? '');
+  return {
+    id: text('id'),
+    timestamp: toIso(field(record, 'timestamp')),
+    selectedTeam: text('team') as TeamId,
+    teamName: text('teamName'),
+    otherTeamText: text('other') || undefined,
+    totalPoints: Number(field(record, 'points')) || 0,
+    answeredCount: Number(field(record, 'answered')) || 0,
+    skippedCount: Number(field(record, 'skipped')) || 0,
+    language: text('language') === 'en' ? 'en' : 'pt',
+    emailContact: text('contact') || undefined,
+    answers: parseAnswers(field(record, 'answersJson')),
+  };
+}
+
 function readRows(name: string): unknown[][] {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
   if (!sheet || sheet.getLastRow() < 2) return [];
@@ -248,7 +298,7 @@ function toResponseRow(s: SubmissionRecord): unknown[] {
     s.skippedCount,
     s.language,
     s.emailContact ?? '',
-    ...SCORED_QUESTION_IDS.map((id) => (s.answers[id]?.isSkipped ? 'SKIPPED' : formatAnswer(s.answers[id]))),
+    ...RESPONSE_COLUMNS.map((c) => c.value(s.answers)),
     JSON.stringify(s.answers).slice(0, MAX_CELL_CHARS),
   ].map(safeCell);
 }
@@ -262,7 +312,8 @@ const toIso = (value: unknown) => (value instanceof Date ? value.toISOString() :
 
 function parseAnswers(value: unknown): Answers {
   try {
-    return JSON.parse(String(value)) as Answers;
+    // Values written by safeCell may carry a leading apostrophe.
+    return JSON.parse(String(value).replace(/^'/, '')) as Answers;
   } catch {
     return {};
   }

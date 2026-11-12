@@ -1,16 +1,10 @@
 // Builds the admin notification for a submission. It is logged, not actually mailed.
+import { describeAnswer, SCORED_QUESTIONS } from './answerText';
 import { MAX_SCORED, POINTS_PER_QUESTION, randomId } from './scoring';
-import type { Answer, EmailLogEntry, SubmissionRecord } from '../types/survey';
+import type { Answer, EmailLogEntry, Question, SubmissionRecord } from '../types/survey';
 
 const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
-
-/** Human-readable form of an answer, shared by the email, admin panel and CSV. */
-export function formatAnswer(answer: Answer): string {
-  if (answer.isSkipped) return '';
-  if (answer.value && typeof answer.value === 'object') return JSON.stringify(answer.value);
-  return String(answer.value || answer.textDetail || '');
-}
 
 const STYLES = `
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b0e14; color: #f1f5f9; padding: 24px; }
@@ -23,19 +17,16 @@ const STYLES = `
     .answers-table th { text-align: left; background: #1e293b; color: #94a3b8; padding: 8px; }
     .answers-table td { padding: 8px; border-bottom: 1px solid #1e293b; vertical-align: top; }`;
 
-function answerRow(questionId: string, answer: Answer): string {
-  const value = answer.isSkipped
+function answerRow(question: Question, answer: Answer | undefined): string {
+  const skipped = !answer || answer.isSkipped;
+  const value = skipped
     ? '<span style="color: #64748b;">(Pergunta pulada - 0 pts)</span>'
-    : escapeHtml(formatAnswer(answer) || 'Respondido');
-  const detail =
-    answer.textDetail && answer.textDetail !== answer.value
-      ? `<br/><small style="color: #94a3b8;">${escapeHtml(answer.textDetail)}</small>`
-      : '';
+    : escapeHtml(describeAnswer(question, answer, 'pt'));
   return `
             <tr>
-              <td style="color: #38bdf8; font-weight: bold;">Q${questionId}</td>
-              <td>${answer.isSkipped ? '⚪ Pulada' : `✅ Respondida (+${POINTS_PER_QUESTION})`}</td>
-              <td style="color: #cbd5e1;">${value} ${detail}</td>
+              <td style="color: #38bdf8; font-weight: bold;">Q${question.id}</td>
+              <td style="color: #94a3b8;">${escapeHtml(question.title.pt)}</td>
+              <td style="color: #cbd5e1;">${value}<br/><small style="color: #64748b;">${skipped ? '⚪ 0 pts' : `✅ +${POINTS_PER_QUESTION} pts`}</small></td>
             </tr>`;
 }
 
@@ -65,11 +56,9 @@ export function buildNotificationEmail(sub: SubmissionRecord, adminEmail: string
     <h3 style="color: #f1f5f9; font-size: 16px;">Respostas Fornecidas:</h3>
     <table class="answers-table">
       <thead>
-        <tr><th>Q#</th><th>Status</th><th>Resposta / Conteúdo</th></tr>
+        <tr><th>Q#</th><th>Pergunta</th><th>Resposta</th></tr>
       </thead>
-      <tbody>${Object.entries(sub.answers)
-        .map(([id, answer]) => answerRow(id, answer))
-        .join('')}
+      <tbody>${SCORED_QUESTIONS.map((q) => answerRow(q, sub.answers[q.id])).join('')}
       </tbody>
     </table>
     <p style="margin-top: 24px; font-size: 12px; color: #64748b; text-align: center;">
