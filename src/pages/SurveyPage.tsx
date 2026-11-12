@@ -101,7 +101,8 @@ export function SurveyPage({ language, isSubmitting, onComplete, onCancel }: Sur
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* On large screens the side card and progress rail stretch to the question card height. */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:items-stretch">
           <SectionPanel
             question={question}
             language={language}
