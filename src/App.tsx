@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AdminModal } from './components/admin/AdminModal';
 import { submitSurvey } from './lib/api';
 import { HomePage } from './pages/HomePage';
@@ -12,7 +12,8 @@ type View = 'home' | 'intro' | 'survey' | 'results';
 export default function App() {
   const [language, setLanguage] = useState<Language>('pt');
   const [view, setView] = useState<View>('home');
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  // The admin panel has no visible link: open it with #admin at the end of the URL.
+  const [isAdminOpen, setIsAdminOpen] = useState(() => window.location.hash === '#admin');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [latestSubmission, setLatestSubmission] = useState<SubmissionRecord | null>(null);
 
@@ -33,7 +34,16 @@ export default function App() {
     }
   };
 
-  const openAdmin = () => setIsAdminOpen(true);
+  useEffect(() => {
+    const onHashChange = () => window.location.hash === '#admin' && setIsAdminOpen(true);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  const closeAdmin = () => {
+    setIsAdminOpen(false);
+    if (window.location.hash === '#admin') history.replaceState(null, '', window.location.pathname + window.location.search);
+  };
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-cyan-400 selection:text-slate-950">
@@ -44,7 +54,6 @@ export default function App() {
             onLanguageChange={setLanguage}
             onStartSurvey={() => setView('intro')}
             onViewLeaderboard={() => setView('results')}
-            onOpenAdmin={openAdmin}
           />
         )}
         {view === 'intro' && (
@@ -75,7 +84,7 @@ export default function App() {
         )}
       </main>
 
-      <AdminModal language={language} isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
+      <AdminModal language={language} isOpen={isAdminOpen} onClose={closeAdmin} />
     </div>
   );
 }

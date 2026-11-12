@@ -1,4 +1,4 @@
-import { ArrowRight, Clock, HelpCircle, Play, Shield, Sparkles, Trophy } from 'lucide-react';
+import { ArrowRight, Clock, HelpCircle, Play, Shield, Trophy } from 'lucide-react';
 import { DnaCanvas } from '../components/DnaCanvas';
 import { translator } from '../lib/i18n';
 import type { Language } from '../types/survey';
@@ -8,7 +8,6 @@ interface HomePageProps {
   onLanguageChange: (lang: Language) => void;
   onStartSurvey: () => void;
   onViewLeaderboard: () => void;
-  onOpenAdmin: () => void;
 }
 
 const LANGUAGES: { id: Language; label: string }[] = [
@@ -18,14 +17,12 @@ const LANGUAGES: { id: Language; label: string }[] = [
 
 const badgeClass =
   'flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-900/70 border border-slate-800 text-xs font-medium text-slate-300';
-const footerTagClass =
-  'flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400';
 
-export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLeaderboard, onOpenAdmin }: HomePageProps) {
+export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLeaderboard }: HomePageProps) {
   const t = translator(language);
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col justify-between overflow-hidden bg-[#07090e]">
+    <div className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-[#07090e]">
       {/* 3D background */}
       <div className="absolute right-0 top-0 bottom-0 w-full lg:w-3/5 h-full opacity-85 pointer-events-auto">
         <DnaCanvas variant="hero" />
@@ -79,16 +76,6 @@ export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLead
             )}
           </p>
 
-          <div className="mt-5 flex items-center gap-2 text-xs font-mono text-cyan-300/90 bg-cyan-950/40 border border-cyan-800/50 rounded-lg px-3 py-2 max-w-md">
-            <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
-            <span>
-              {t(
-                'Gamificado: Escolha seu time e acumule até 100 pontos para o placar!',
-                'Gamified: Select your squad and contribute up to 100 pts to the leaderboard!'
-              )}
-            </span>
-          </div>
-
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <button
               onClick={onStartSurvey}
@@ -106,41 +93,22 @@ export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLead
               <span>{t('Ver Placar das Equipes', 'View Teams Leaderboard')}</span>
             </button>
           </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <div className={badgeClass}>
-              <Shield className="w-3.5 h-3.5 text-cyan-400" />
-              <span>{t('100% Anônimo', '100% Anonymous')}</span>
-            </div>
-            <div className={badgeClass}>
-              <Clock className="w-3.5 h-3.5 text-purple-400" />
-              <span>{t('~8-10 min Tempo médio', '~8-10 min Average time')}</span>
-            </div>
-            <div className={badgeClass}>
-              <HelpCircle className="w-3.5 h-3.5 text-pink-400" />
-              <span>{t('17 Questões Multi-Choice', '17 Multi-Choice Questions')}</span>
-            </div>
-          </div>
         </div>
       </div>
 
       <footer className="relative z-10 border-t border-slate-900/90 bg-[#05070a]/90 backdrop-blur-sm py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className={footerTagClass}>
-              <span>🎓</span>
-              <span>EXPLORATORY ACADEMIC BIO-SOFTWARE RESEARCH</span>
-            </div>
-            <div className={footerTagClass}>
-              <span>🔒</span>
-              <span>ANONYMOUS E2EE INGESTION (SHA-256)</span>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center gap-3">
+          <div className={badgeClass}>
+            <Shield className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{t('100% Anônimo', '100% Anonymous')}</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px] text-slate-500 text-center md:text-right">
-            <button onClick={onOpenAdmin} className="hover:text-cyan-400 transition-colors text-slate-500 cursor-pointer">
-              {t('Painel Admin', 'Admin Portal')}
-            </button>
-            <span>© 2026 GENOME.DEV Bio-Computational Research Consortium.</span>
+          <div className={badgeClass}>
+            <Clock className="w-3.5 h-3.5 text-purple-400" />
+            <span>{t('~8-10 min Tempo médio', '~8-10 min Average time')}</span>
+          </div>
+          <div className={badgeClass}>
+            <HelpCircle className="w-3.5 h-3.5 text-pink-400" />
+            <span>{t('17 Questões Multi-Choice', '17 Multi-Choice Questions')}</span>
           </div>
         </div>
       </footer>
