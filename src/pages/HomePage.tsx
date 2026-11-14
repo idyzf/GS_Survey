@@ -1,5 +1,6 @@
-import { ArrowRight, Clock, HelpCircle, Play, Shield, Trophy } from 'lucide-react';
+import { ArrowRight, Clock, ExternalLink, HelpCircle, Play, Shield, Trophy } from 'lucide-react';
 import { DnaCanvas } from '../components/DnaCanvas';
+import { PORTFOLIO_URL } from '../config';
 import { translator } from '../lib/i18n';
 import type { Language } from '../types/survey';
 
@@ -102,18 +103,29 @@ export function HomePage({ language, onLanguageChange, onStartSurvey, onViewLead
       </div>
 
       <footer className="relative z-10 border-t border-slate-900/90 bg-[#05070a]/90 backdrop-blur-sm py-4">
-        <div className={`${EDGE} flex flex-wrap items-center justify-end gap-2 sm:gap-3`}>
-          <div className={badgeClass}>
-            <Shield className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{t('100% Anônimo', '100% Anonymous')}</span>
-          </div>
-          <div className={badgeClass}>
-            <Clock className="w-3.5 h-3.5 text-purple-400" />
-            <span>{t('~8-10 min Tempo médio', '~8-10 min Average time')}</span>
-          </div>
-          <div className={badgeClass}>
-            <HelpCircle className="w-3.5 h-3.5 text-pink-400" />
-            <span>{t('17 Questões Multi-Choice', '17 Multi-Choice Questions')}</span>
+        <div className={`${EDGE} flex flex-wrap items-center justify-between gap-3`}>
+          <a
+            href={PORTFOLIO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg border border-cyan-800/60 bg-cyan-950/30 text-[11px] sm:text-xs font-medium text-cyan-300 hover:text-white hover:border-cyan-500 transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>{t('Conheça mais projetos', 'See more projects')}</span>
+          </a>
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+            <div className={badgeClass}>
+              <Shield className="w-3.5 h-3.5 text-cyan-400" />
+              <span>{t('100% Anônimo', '100% Anonymous')}</span>
+            </div>
+            <div className={badgeClass}>
+              <Clock className="w-3.5 h-3.5 text-purple-400" />
+              <span>{t('~8-10 min Tempo médio', '~8-10 min Average time')}</span>
+            </div>
+            <div className={badgeClass}>
+              <HelpCircle className="w-3.5 h-3.5 text-pink-400" />
+              <span>{t('17 Questões Multi-Choice', '17 Multi-Choice Questions')}</span>
+            </div>
           </div>
         </div>
       </footer>
