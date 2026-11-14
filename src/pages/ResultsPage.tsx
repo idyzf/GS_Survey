@@ -1,8 +1,9 @@
 import confetti from 'canvas-confetti';
-import { Check, CheckCircle2, RotateCcw, Share2 } from 'lucide-react';
+import { Check, CheckCircle2, ExternalLink, RotateCcw, Share2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Leaderboard } from '../components/results/Leaderboard';
 import { Scorecard } from '../components/results/Scorecard';
+import { PORTFOLIO_URL } from '../config';
 import { TEAM_IDS } from '../data/teams';
 import { fetchLeaderboard } from '../lib/api';
 import { translator } from '../lib/i18n';
@@ -118,13 +119,24 @@ export function ResultsPage({ language, latestSubmission, onRetake }: ResultsPag
                   {t('Atualizar agora', 'Refresh now')}
                 </button>
               </div>
-              <button
-                onClick={onRetake}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-bold hover:opacity-95 transition-all shadow-md shadow-cyan-500/20"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>{t('Realizar Nova Participação', 'Take Survey Again')}</span>
-              </button>
+              <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+                <a
+                  href={PORTFOLIO_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-700 bg-slate-900 text-slate-200 font-bold hover:text-white hover:border-cyan-500 transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{t('Conheça mais projetos', 'See more projects')}</span>
+                </a>
+                <button
+                  onClick={onRetake}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-bold hover:opacity-95 transition-all shadow-md shadow-cyan-500/20"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{t('Realizar Nova Participação', 'Take Survey Again')}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
